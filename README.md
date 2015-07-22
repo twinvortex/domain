@@ -2,9 +2,11 @@
 Generate bind and apache files easy to host and create virtual hosts (Set for Ubuntu)
 
 # Command
+```
   sudo php domain.php add:domain example.com 192.168.1.1
+```
 
-What it does:
+### What it does:
 
 (Bind)
 It generates folder and host file in /etc/bind/hosts (including nameserver ns1.example.com with the specified IP)
