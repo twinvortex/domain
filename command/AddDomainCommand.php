@@ -1,0 +1,114 @@
+<?php
+
+namespace Vortex\Command;
+
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
+
+class AddDomainCommand extends Command
+{
+
+    public function configure()
+    {
+        $this->setName('add:domain')
+            ->setDescription('Add a domain name')
+            ->addArgument('name', InputArgument::REQUIRED, 'The name of the domain')
+            ->addArgument('ip', InputArgument::REQUIRED, 'The IP of the domain');
+
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        // load the variables from config
+        $config = require __DIR__ . '/../bootstrap/config.php';
+
+        $name = $input->getArgument('name');
+        $ip = $input->getArgument('ip');
+
+        // validate the IP
+        if(!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $output->writeln('<bg=red>Not a valid ip: '.$ip.'</bg=red>');
+        }
+
+        // Load the templates
+        $zone = file_get_contents(__DIR__ . '/templates/zone.txt');
+        $bind = file_get_contents(__DIR__ . '/templates/bind.txt');
+        $apache = file_get_contents(__DIR__ . '/templates/apache.txt');
+
+        $search[] = '{domain}';
+        $replace[] = $name;
+        $search[] = '{IP}';
+        $replace[] = $ip;
+
+        $zone = str_replace($search, $replace, $zone);
+        $bind = str_replace($search, $replace, $bind);
+        $apache = str_replace($search, $replace, $apache);
+
+        // The bind host file
+        $bindHostFile = $config['bind_hosts_folder'] . '/' . $name . '.hosts';
+        // named.conf.local file
+        $namedConf = $config['named_conf'];
+
+
+        // check if the hosts folder is not found
+        if (!is_dir($config['bind_hosts_folder'])) {
+            mkdir($config['bind_hosts_folder'], 0666, true);
+        } else {
+            if(!file_exists($bindHostFile)) {
+                if (!file_put_contents($bindHostFile, $bind))
+                    $output->writeln('<bg=red>Could not put contents to file: ' . $bindHostFile . '</bg=red>');
+
+                if (!file_put_contents($namedConf, $zone, FILE_APPEND | LOCK_EX))
+                    $output->writeln('<bg=red>Could not append zone file!</bg=red>');
+            } else {
+                $output->writeln('<bg=red>Domain file already exists!</bg=red>');
+            }
+        }
+
+        // Add apache vhost
+        if(!is_dir($config['apache_sites'])) {
+            mkdir($config['apache_sites'], 0666, true);
+            $output->writeln('<bg=red>Could not find folder: '.$config['apache_sites'].'</bg=red>');
+        } else {
+            if(!file_put_contents($config['apache_sites'].'/'.$name.'.conf', $apache))
+                $output->writeln('<bg=red>Apache Virtual Host created.</bg=red>');
+
+            if(!is_dir($config['apache'].'/'.$name.'/public'))
+                mkdir($config['apache'].'/'.$name.'/public', 0755, true);
+        }
+
+        // Apache and bind can be restarted > Copy Paste
+        $process = new Process('service bind9 restart');
+        $process->run();
+
+        if(!$process->isSuccessful()) {
+            throw new \RuntimeException($process->getErrorOutput());
+        }
+
+        echo $process->getOutput();
+
+        $process = new Process('a2ensite '.$name);
+
+        $process->run();
+
+        if(!$process->isSuccessful()) {
+            throw new \RuntimeException($process->getErrorOutput());
+        }
+
+        echo $process->getOutput();
+
+        $process = new Process('service apache2 restart');
+        $process->run();
+
+        if(!$process->isSuccessful()) {
+            throw new \RuntimeException($process->getErrorOutput());
+        }
+
+        echo $process->getOutput();
+    }
+
+}
+

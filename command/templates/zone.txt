@@ -1,0 +1,5 @@
+zone "{domain}" {
+        type master;
+        file "/etc/bind/hosts/{domain}.hosts";
+};
+
