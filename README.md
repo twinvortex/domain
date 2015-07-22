@@ -1,8 +1,8 @@
-# domain
+# Domain
 Generate bind and apache files easy to host and create virtual hosts (Set for Ubuntu)
 
 # Command
-sudo php domain.php add:domain example.com 192.168.1.1
+  sudo php domain.php add:domain example.com 192.168.1.1
 
 What it does:
 
