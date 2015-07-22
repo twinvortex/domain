@@ -18,4 +18,4 @@ Restarts Bind and Apache at the end
 
 Note: This was done so it works on Ubuntu, config files and commands need to be changed if you want it to work on different linux distros.
 
-The template for each file can be found in /boostrap/config.php
+The template for each file can be found in /command/templates
