@@ -16,17 +16,22 @@ class AddDomainCommand extends Command
         $this->setName('add:domain')
             ->setDescription('Add a domain name')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the domain')
-            ->addArgument('ip', InputArgument::REQUIRED, 'The IP of the domain');
+            ->addArgument('ip', InputArgument::REQUIRED, 'The IP of the domain')
+            ->addArgument('nameservers', InputArgument::OPTIONAL, 'The nameservers');
 
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $data = null;
         // load the variables from config
         $config = require __DIR__ . '/../bootstrap/config.php';
 
         $name = $input->getArgument('name');
         $ip = $input->getArgument('ip');
+        $nameservers = $input->getArgument('nameservers');
+
+//        echo $name.' - '. $ip . ' - '.$nameservers;
 
         // validate the IP
         if(!filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -35,11 +40,28 @@ class AddDomainCommand extends Command
 
         // Load the templates
         $zone = file_get_contents(__DIR__ . '/templates/zone.txt');
-        $bind = file_get_contents(__DIR__ . '/templates/bind.txt');
+        if(!$nameservers) {
+            $bind = file_get_contents(__DIR__ . '/templates/bind.txt');
+        } else {
+            $bind = file_get_contents(__DIR__ . '/templates/bind2.txt');
+            $ns = explode(',', $nameservers);
+
+            $search[] = '{ns}';
+            $replace[] = $ns[0];
+
+            foreach($ns as $key) {
+                $nameserver = trim($key);
+                $data .= $name.'.    IN  NS  '.$nameserver.'.'."\n";
+            }
+
+            $search[] = '{nameservers}';
+            $replace[] = $data;
+        }
         $apache = file_get_contents(__DIR__ . '/templates/apache.txt');
 
         $search[] = '{domain}';
         $replace[] = $name;
+
         $search[] = '{IP}';
         $replace[] = $ip;
 
