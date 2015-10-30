@@ -6,6 +6,12 @@ Generate bind and apache files easy to host and create virtual hosts (Set for Ub
   sudo php domain.php add:domain example.com 192.168.1.1
 ```
 
+# Now nameservers can be added instead of creating nameservers for the actual domain
+```
+  sudo php domain.php add:domain example.com 192.168.1.1 ns1.examplenameserver.com,ns2.examplenameserver.com
+```
+You can add as manny nameservers as needed.
+
 ### What it does:
 
 (Bind)
