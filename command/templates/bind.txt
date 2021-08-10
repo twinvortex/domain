@@ -1,0 +1,14 @@
+$ttl 38400
+{domain}.  IN      SOA     ns1.{domain}. webmaster@{domain}. (
+                        1
+                        10800
+                        3600
+                        604800
+                        38400 )
+{domain}.  IN      NS      ns1.{domain}.
+{domain}.  IN      NS      ns2.{domain}.
+ns1.{domain}.      IN      A       {IP}
+ns2.{domain}.      IN      A       {IP}
+{domain}.  IN      A       {IP}
+www.{domain}.      IN      A       {IP}
+mail.{domain}.      IN      A      {IP}

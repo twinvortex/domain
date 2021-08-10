@@ -1,0 +1,25 @@
+{
+    "name": "vortex/domain",
+    "description": "Add domains to bind and apache",
+    "authors": [
+        {
+            "name": "Daniel Marin",
+            "email": "dan@spiral8.net"
+        }
+    ],
+    "require": {
+        "symfony/console": "^2.7",
+        "symfony/process": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vortex\\Command\\": "command"
+        }
+    },
+    "bin": ["bin/domain"],
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    }
+}
