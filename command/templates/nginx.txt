@@ -16,6 +16,10 @@ server {
             include snippets/fastcgi-php.conf;
             fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
     }
+    
+    if ($host = www.{domain}) {
+            return 301 https://{domain}$request_uri;
+    }
 
     location ~ /\.ht {
             deny all;
