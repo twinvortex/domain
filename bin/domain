@@ -4,7 +4,7 @@
 require __DIR__ . '/../bootstrap/start.php';
 use Symfony\Component\Console\Application;
 
-$app = new Application('Vortex Domain', '1.0');
+$app = new Application('Vortex Domain', '1.01');
 
 $app->add(new \Vortex\Command\AddDomainCommand());
 $app->run();
